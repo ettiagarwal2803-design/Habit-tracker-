@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>my habits</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+:root{
+  --bg:#111318;--bg2:#1a1d24;--bg3:#22262f;--bg4:#2a2e38;
+  --text:#e8eaf0;--text2:#9098a8;--text3:#5a6275;
+  --border:#2a2e38;--border2:#353a47;
+  --purple:#7f77dd;--purple-dim:#534ab7;
+  --teal:#1d9e75;--amber:#ef9f27;--coral:#d85a30;
+  --blue:#378add;--green:#639922;--pink:#d4537e;
+}
+.app{background:var(--bg);min-height:100vh;max-width:480px;margin:0 auto;color:var(--text);padding:1.25rem 1rem}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.logo{font-size:18px;font-weight:600;color:var(--text)}
+.date-str{font-size:13px;color:var(--text2)}
+.tab-bar{display:flex;gap:6px;margin-bottom:1.25rem;background:var(--bg2);border-radius:10px;padding:4px}
+.tab{flex:1;padding:7px 4px;text-align:center;font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;color:var(--text2);transition:.15s;border:none;background:transparent}
+.tab.active{background:var(--bg4);color:var(--text)}
+.streak-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+.streak-card{background:var(--bg2);border-radius:10px;padding:12px 10px;text-align:center}
+.streak-num{font-size:22px;font-weight:600}
+.streak-label{font-size:11px;color:var(--text2);margin-top:2px}
+.habits-list{display:flex;flex-direction:column;gap:8px}
+.habit-card{background:var(--bg2);border-radius:12px;padding:14px;border:0.5px solid var(--border2);transition:.15s}
+.habit-card.done{border-color:transparent}
+.habit-header{display:flex;align-items:center;gap:10px}
+.habit-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.habit-info{flex:1}
+.habit-name{font-size:14px;font-weight:500;line-height:1.3}
+.habit-meta{font-size:12px;color:var(--text2);margin-top:1px}
+.check-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;color:var(--text2);font-size:14px}
+.progress-wrap{margin-top:10px}
+.progress-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px}
+.progress-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:.3s}
+.qty-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.qty-btn{width:28px;height:28px;border-radius:7px;background:var(--bg4);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-val{font-size:14px;font-weight:500;min-width:60px;text-align:center}
+.qty-unit{font-size:12px;color:var(--text2)}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:1rem}
+.week-cell-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.week-day-label{font-size:10px;color:var(--text3)}
+.week-cell{width:100%;aspect-ratio:1;border-radius:5px;background:var(--bg3)}
+.week-cell.partial{background:var(--amber)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border-radius:10px;padding:12px}
+.stat-val{font-size:20px;font-weight:600}
+.stat-lbl{font-size:12px;color:var(--text2);margin-top:2px}
+.section-title{font-size:12px;font-weight:500;color:var(--text2);margin:1rem 0 0.5rem;letter-spacing:.04em;text-transform:uppercase}
+.add-btn{width:100%;margin-top:1rem;padding:12px;background:var(--bg2);border:0.5px dashed var(--border2);border-radius:12px;color:var(--text2);font-size:14px;cursor:pointer;transition:.15s}
+.add-btn:hover{background:var(--bg3)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border-radius:16px 16px 0 0;padding:1.5rem 1.25rem 2rem;width:100%;max-width:480px}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1rem}
+.form-row{margin-bottom:0.75rem}
+.form-label{font-size:12px;color:var(--text2);margin-bottom:4px;display:block}
+.form-input,.form-select{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:8px;padding:9px 10px;color:var(--text);font-size:14px;outline:none}
+.modal-btns{display:flex;gap:8px;margin-top:1rem}
+.btn-cancel{flex:1;padding:10px;background:var(--bg4);border:none;border-radius:8px;color:var(--text2);font-size:14px;cursor:pointer}
+.btn-save{flex:1;padding:10px;background:var(--purple-dim);border:none;border-radius:8px;color:#e0deff;font-size:14px;font-weight:500;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="app" id="root">
+  <div class="header">
+    <span class="logo">my habits</span>
+    <span class="date-str" id="datestr"></span>
+  </div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('today')">today</button>
+    <button class="tab" onclick="switchTab('week')">week</button>
+    <button class="tab" onclick="switchTab('stats')">stats</button>
+  </div>
+  <div id="tab-today"></div>
+  <div id="tab-week" style="display:none"></div>
+  <div id="tab-stats" style="display:none"></div>
+</div>
+
+<div class="modal-overlay" id="modal-bg">
+  <div class="modal">
+    <div class="modal-title">add habit</div>
+    <div class="form-row"><label class="form-label">name</label><input class="form-input" id="new-name" placeholder="e.g. morning walk"></div>
+    <div class="form-row"><label class="form-label">type</label>
+      <select class="form-select" id="new-type" onchange="onTypeChange()">
+        <option value="check">check-off (done / not done)</option>
+        <option value="count">count (e.g. glasses of water)</option>
+        <option value="duration">duration (minutes)</option>
+      </select>
+    </div>
+    <div class="form-row" id="goal-row" style="display:none"><label class="form-label">goal</label><input class="form-input" id="new-goal" type="number" min="1" value="8"></div>
+    <div class="form-row" id="unit-row" style="display:none"><label class="form-label">unit</label><input class="form-input" id="new-unit" placeholder="e.g. glasses, pages, mins"></div>
+    <div class="form-row"><label class="form-label">icon (emoji)</label><input class="form-input" id="new-icon" placeholder="e.g. 🏃" maxlength="2" value="⭐"></div>
+    <div class="form-row"><label class="form-label">color</label>
+      <select class="form-select" id="new-color">
+        <option value="#7f77dd">purple</option>
+        <option value="#1d9e75">teal</option>
+        <option value="#ef9f27">amber</option>
+        <option value="#d85a30">coral</option>
+        <option value="#378add">blue</option>
+        <option value="#639922">green</option>
+        <option value="#d4537e">pink</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">cancel</button>
+      <button class="btn-save" onclick="saveHabit()">save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS=['sun','mon','tue','wed','thu','fri','sat'];
+const today=new Date();
+const todayKey=today.toISOString().slice(0,10);
+document.getElementById('datestr').textContent=today.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+
+let habits=JSON.parse(localStorage.getItem('hbt_habits')||'null')||[
+  {id:'h1',name:'exercise / fitness',type:'duration',goal:30,unit:'mins',icon:'🏃',color:'#7f77dd'},
+  {id:'h2',name:'water intake',type:'count',goal:8,unit:'glasses',icon:'💧',color:'#378add'},
+  {id:'h3',name:'reading',type:'duration',goal:20,unit:'mins',icon:'📚',color:'#1d9e75'},
+  {id:'h4',name:'sleep schedule',type:'check',goal:1,unit:'',icon:'🌙',color:'#534ab7'},
+  {id:'h5',name:'meditation',type:'duration',goal:10,unit:'mins',icon:'🧘',color:'#d4537e'},
+  {id:'h6',name:'diet / nutrition',type:'check',goal:1,unit:'',icon:'🥗',color:'#639922'},
+  {id:'h7',name:'study / learning',type:'duration',goal:45,unit:'mins',icon:'🎓',color:'#ef9f27'},
+  {id:'h8',name:'screen time limit',type:'check',goal:1,unit:'',icon:'📵',color:'#d85a30'},
+];
+let logs=JSON.parse(localStorage.getItem('hbt_logs')||'{}');
+
+function save(){localStorage.setItem('hbt_habits',JSON.stringify(habits));localStorage.setItem('hbt_logs',JSON.stringify(logs));}
+function getLog(hid,date){return(logs[date]||{})[hid]||0;}
+function setLog(hid,date,val){if(!logs[date])logs[date]={};logs[date][hid]=val;save();}
+function isDone(h,date){const v=getLog(h.id,date);return h.type==='check'?v>=1:v>=h.goal;}
+function getStreak(h){let s=0,d=new Date(today);while(s<365){const k=d.toISOString().slice(0,10);if(isDone(h,k))s++;else if(k!==todayKey)break;d.setDate(d.getDate()-1);}return s;}
+function totalStreak(){let s=0;for(let d=new Date(today);s<365;d.setDate(d.getDate()-1)){const k=d.toISOString().slice(0,10);const allDone=habits.every(h=>isDone(h,k));if(!allDone&&k!==todayKey)break;if(allDone)s++;}return s;}
+function completedToday(){return habits.filter(h=>isDone(h,todayKey)).length;}
+
+function renderToday(){
+  const comp=completedToday(),pct=habits.length?Math.round(comp/habits.length*100):0,ts=totalStreak();
+  let html=`<div class="streak-bar">
+    <div class="streak-card"><div class="streak-num" style="color:#1d9e75">${comp}/${habits.length}</div><div class="streak-label">done today</div></div>
+    <div class="streak-card"><div class="streak-num" style="color:#ef9f27">${ts}</div><div class="streak-label">day streak</div></div>
+    <div class="streak-card"><div class="streak-num" style="color:#7f77dd">${pct}%</div><div class="streak-label">completion</div></div>
+  </div><div class="habits-list">`;
+  for(const h of habits){
+    const val=getLog(h.id,todayKey),done=isDone(h,todayKey),streak=getStreak(h);
+    html+=`<div class="habit-card${done?' done':''}">
+      <div class="habit-header">
+        <div class="habit-icon" style="background:${h.color}22">${h.icon}</div>
+        <div class="habit-info">
+          <div class="habit-name">${h.name}</div>
+          <div class="habit-meta">${streak>0?`🔥 ${streak} day streak`:h.type==='check'?'tap to complete':`${val}${h.unit?' '+h.unit:''} of ${h.goal} ${h.unit}`}</div>
+        </div>
+        ${h.type==='check'?`<button class="check-btn" onclick="toggleCheck('${h.id}')" style="${done?'background:'+h.color+';border-color:'+h.color+';color:#fff':''}">${done?'✓':'○'}</button>`:''}
+      </div>`;
+    if(h.type!=='check'){
+      const progress=Math.min(val/h.goal,1)*100;
+      html+=`<div class="progress-wrap">
+        <div class="progress-row"><span>${val} / ${h.goal} ${h.unit}</span><span>${Math.round(progress)}%</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${h.color}"></div></div>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="adjustQty('${h.id}',-${h.type==='count'?1:5})">−</button>
+        <span class="qty-val">${val} <span class="qty-unit">${h.unit}</span></span>
+        <button class="qty-btn" onclick="adjustQty('${h.id}',${h.type==='count'?1:5})">+</button>
+        <button class="qty-btn" style="margin-left:auto;font-size:12px;width:auto;padding:0 10px;color:${h.color};background:${h.color}22" onclick="adjustQty('${h.id}',${h.goal-val})">done</button>
+      </div>`;
+    }
+    html+=`</div>`;
+  }
+  html+=`</div><button class="add-btn" onclick="openModal()">+ add habit</button>`;
+  document.getElementById('tab-today').innerHTML=html;
+}
+
+function renderWeek(){
+  let html='';
+  for(const h of habits){
+    html+=`<div style="background:var(--bg2);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span>${h.icon}</span><span style="font-size:14px;font-weight:500">${h.name}</span>
+        <span style="font-size:12px;color:var(--text2);margin-left:auto">🔥 ${getStreak(h)}</span>
+      </div>
+      <div class="week-grid">`;
+    for(let i=6;i>=0;i--){
+      const d=new Date(today);d.setDate(d.getDate()-i);
+      const k=d.toISOString().slice(0,10);
+      const done=isDone(h,k),partial=!done&&getLog(h.id,k)>0;
+      html+=`<div class="week-cell-wrap">
+        <div class="week-cell${partial?' partial':''}" style="${done?'background:'+h.color:''}"></div>
+        <div class="week-day-label">${DAYS[d.getDay()]}</div>
+      </div>`;
+    }
+    html+=`</div></div>`;
+  }
+  document.getElementById('tab-week').innerHTML=html;
+}
+
+function renderStats(){
+  let td=0,tp=0;
+  for(let i=6;i>=0;i--){const d=new Date(today);d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);habits.forEach(h=>{tp++;if(isDone(h,k))td++;});}
+  const weekPct=tp?Math.round(td/tp*100):0,ts=totalStreak();
+  let html=`<div class="stats-grid">
+    <div class="stat-card"><div class="stat-val" style="color:#1d9e75">${weekPct}%</div><div class="stat-lbl">7-day avg</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#ef9f27">${ts}</div><div class="stat-lbl">perfect day streak</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#7f77dd">${habits.length}</div><div class="stat-lbl">habits tracked</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#d4537e">${completedToday()}</div><div class="stat-lbl">completed today</div></div>
+  </div><div class="section-title">habit performance (7 days)</div>`;
+  const sorted=[...habits].sort((a,b)=>getStreak(b)-getStreak(a));
+  for(const h of sorted){
+    let d7=0;for(let i=0;i<7;i++){const d=new Date(today);d.setDate(d.getDate()-i);if(isDone(h,d.toISOString().slice(0,10)))d7++;}
+    const pct=Math.round(d7/7*100);
+    html+=`<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>${h.icon} ${h.name}</span><span style="color:${h.color}">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${h.color}"></div></div>
+    </div>`;
+  }
+  document.getElementById('tab-stats').innerHTML=html;
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['today','week','stats'][i]===tab));
+  document.getElementById('tab-today').style.display=tab==='today'?'':'none';
+  document.getElementById('tab-week').style.display=tab==='week'?'':'none';
+  document.getElementById('tab-stats').style.display=tab==='stats'?'':'none';
+  if(tab==='week')renderWeek();
+  if(tab==='stats')renderStats();
+}
+
+function toggleCheck(hid){setLog(hid,todayKey,getLog(hid,todayKey)>=1?0:1);renderToday();}
+function adjustQty(hid,delta){setLog(hid,todayKey,Math.max(0,getLog(hid,todayKey)+delta));renderToday();}
+function openModal(){document.getElementById('modal-bg').classList.add('open');onTypeChange();}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+function onTypeChange(){
+  const t=document.getElementById('new-type').value;
+  document.getElementById('goal-row').style.display=t==='check'?'none':'';
+  document.getElementById('unit-row').style.display=t==='check'?'none':'';
+}
+function saveHabit(){
+  const name=document.getElementById('new-name').value.trim();
+  if(!name)return;
+  habits.push({id:'h'+Date.now(),name,type:document.getElementById('new-type').value,goal:parseInt(document.getElementById('new-goal').value)||1,unit:document.getElementById('new-unit').value.trim(),icon:document.getElementById('new-icon').value||'⭐',color:document.getElementById('new-color').value});
+  save();closeModal();renderToday();
+  document.getElementById('new-name').value='';
+}
+
+renderToday();
+</script>
+</body>
+</html>
